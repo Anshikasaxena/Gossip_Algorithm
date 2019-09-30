@@ -52,27 +52,24 @@ defmodule Proj2 do
 
         "twoD" ->
           nl = TwoDGridTopology.twoD_topology(xyList, rng)
-          IO.inspect(nl, label: "newList")
 
         "threeD" ->
           nl = ThreeD.threeD_topology(num)
-          IO.inspect(nl)
 
         _ ->
           IO.puts("Incorrect topology type")
+          # TO DO: Program should stop here...
       end
 
-      IO.puts("Got nl")
+      IO.inspect(nl, label: "Got nl")
       DySupervisor.start_child(nl, algo, x)
       IO.puts("Child started #{x}")
     end
 
     children = DynamicSupervisor.which_children(DySupervisor)
     IO.inspect(children)
-    # Enum.each(children,fn x-> GenServer.cast(x,{:get_neig,})
 
     # Start the first message
-    # A check if names have been assigned correctly
     :ok = GenServer.call(:"1", {:rumor})
 
     # Start the Rounds

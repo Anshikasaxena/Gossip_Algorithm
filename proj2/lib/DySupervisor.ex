@@ -9,14 +9,14 @@ defmodule DySupervisor do
   def start_child(nl, algo, x) do
     if algo == "Gossip" do
       child_spec = Supervisor.child_spec({Gossip, [x, nl]}, id: x, restart: :temporary)
+      {:ok, child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
+    else
+      child_spec = Supervisor.child_spec({PushSum, [x, nl]}, id: x, restart: :temporary)
+      {:ok, child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
     end
 
-    child_spec = Supervisor.child_spec({Gossip, [x, nl]}, id: x, restart: :temporary)
-    # if algo == "Push-Sum" do
-    # children = Supervisor.child_spec({Push - Sum, [x, 1, nl]}, id: x, restart: :temporary)
-    # end
-
-    {:ok, child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
+    # why is this second one here?
+    # child_spec = Supervisor.child_spec({Gossip, [x, nl]}, id: x, restart: :temporary)
   end
 
   def init(init_arg) do
