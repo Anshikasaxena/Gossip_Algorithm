@@ -81,6 +81,8 @@ defmodule ThreeD do
           end
         end
       end
+
+    xyzList = List.flatten(xyzList)
   end
 
   def roundUp(numActors) do
@@ -96,7 +98,7 @@ defmodule ThreeD do
     # have to already have all the neighbors mapped to each other
     # this should just go to index and return value
     node = Enum.at(neighbor_map, node_num)
-    [{x, y, z, i, nl}] = node
+    {x, y, z, cube, i, nl} = node
     nl
   end
 
@@ -132,6 +134,31 @@ end
 
 # Main Application
 num = 12
+rng = Range.new(1, num)
 
 xyzList = ThreeD.threeD_topology(num)
 IO.inspect(xyzList)
+
+neighborsList = ThreeD.threeDtop(0, rng, xyzList)
+IO.inspect(neighborsList, label: "0 neighborsList")
+
+neighborsList = ThreeD.threeDtop(1, rng, xyzList)
+IO.inspect(neighborsList, label: "1 neighborsList")
+
+neighborsList = ThreeD.threeDtop(2, rng, xyzList)
+IO.inspect(neighborsList, label: "2 neighborsList")
+
+neighborsList = ThreeD.threeDtop(3, rng, xyzList)
+IO.inspect(neighborsList, label: "3 neighborsList")
+
+neighborsList = ThreeD.threeDtop(4, rng, xyzList)
+IO.inspect(neighborsList, label: "4 neighborsList")
+
+neighborsList = ThreeD.threeDtop(5, rng, xyzList)
+IO.inspect(neighborsList, label: "5 neighborsList")
+
+neighborsList = ThreeD.threeDtop(6, rng, xyzList)
+IO.inspect(neighborsList, label: "6 neighborsList")
+
+neighborsList = ThreeD.threeDtop(7, rng, xyzList)
+IO.inspect(neighborsList, label: "7 neighborsList")
