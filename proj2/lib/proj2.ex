@@ -45,7 +45,7 @@ defmodule Proj2 do
       case topology do
         "Line" ->
           nl = Line_topology.line_topology(x, rng)
-          IO.inspect(nl, label: "Got nl")
+          IO.inspect(nl, label: "Line NeighborsList is")
           DySupervisor.start_child(nl, algo, x)
           IO.puts("Child started #{x}")
 
