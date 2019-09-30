@@ -45,7 +45,7 @@ defmodule Start_Rounds do
 
             # remove_me(pidx,nl)
 
-            init_arg >= 0 ->
+            init_arg > 0 ->
               # pick a random neighbor and start sending message
               sendto = Enum.take_random(nl, 1)
               sendto = Enum.at(sendto, 0)
@@ -61,9 +61,9 @@ defmodule Start_Rounds do
                 :ok = GenServer.call(sendto, {:rumor, message})
               end
 
-              # QUESTION: why was this written like this? 
-              # init_arg == 0 ->
-              #   IO.puts("Nothing here")
+            # QUESTION: why was this written like this?
+            init_arg == 0 ->
+              IO.puts("No rumor yet")
           end
         else
           children = List.delete(children, x)

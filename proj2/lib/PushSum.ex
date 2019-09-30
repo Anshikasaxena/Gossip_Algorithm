@@ -3,7 +3,7 @@ defmodule PushSum do
 
   def start_link([init_arg, nl]) do
     id = init_arg
-    new_arg = 0
+    new_arg = 1
     # Check - if this works
     {:ok, _pid} = GenServer.start_link(__MODULE__, {new_arg, nl, init_arg}, name: :"#{id}")
   end
@@ -39,7 +39,7 @@ defmodule PushSum do
         Start_Rounds.remove_me(current, new_nl)
         {:reply, :ok, {new_state, new_nl, news, neww, newRatio, oldRatio}}
       else
-        new_state = 0
+        new_state = 1
         IO.inspect(self(), label: "I'm resetting state because my difference was #{difference}")
         {:reply, :ok, {new_state, new_nl, news, neww, newRatio, oldRatio}}
       end
