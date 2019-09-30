@@ -15,6 +15,8 @@ defmodule Start_Rounds do
           state = :sys.get_state(pidx)
           init_arg = elem(state, 0)
           nl = elem(state, 1)
+          s = elem(state, 2)
+          w = elem(state, 3)
           # IO.inspect(init_arg)
 
           values = Process.info(pidx)
@@ -53,7 +55,8 @@ defmodule Start_Rounds do
               if algo == "Gossip" do
                 :ok = GenServer.call(sendto, {:rumor})
               else
-                message = {1, 1}
+                # send your s and w
+                message = {s, w}
                 :ok = GenServer.call(sendto, {:rumor, message})
               end
 

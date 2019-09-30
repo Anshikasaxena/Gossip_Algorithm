@@ -5,17 +5,21 @@ TO DO:
 Line -> Done
   Tested:
     Gossip 1000 --> passed
-    Push Sum
+    Push Sum; process is dead
 Full -> Done
   Tested:
     Gossip 1000 --> passed
-    Push Sum
+    Push Sum; process is dead
 2D ->
   Fix weird ‘\a’ etc error
+  No neighbors error
+  Never terminating 
   Termination
 3D ->
   Fix weird ‘\a’ etc error
-  Change implementation process
+  3d they are all individual cubes
+    - [ ] instead have front check front element - 1
+    - [ ] instead have back check back element + 1
   Termination
 
 Honeycomb ->
