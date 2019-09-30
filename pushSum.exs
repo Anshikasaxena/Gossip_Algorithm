@@ -6,11 +6,11 @@ defmodule DySupervisor do
     {:ok, _pid} = DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
-  def start_child(nl, algo, x) do
+  def start_child(nl, _algo, x) do
     # node has s, w, oldRatios, done, neighbors, as it's state
     child_spec = Supervisor.child_spec({PushSum, [x, nl]}, id: x, restart: :temporary)
 
-    {:ok, child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
+    {:ok, _child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
   end
 
   def init(init_arg) do
@@ -23,7 +23,7 @@ defmodule Full_topology do
     # Produce a list of neighbors for the given specific node
     main_node = node_num
     nebhrs = Enum.filter(rng, fn x -> x != main_node end)
-    nl = Enum.map(nebhrs, fn x -> :"#{x}" end)
+    _nl = Enum.map(nebhrs, fn x -> :"#{x}" end)
   end
 end
 
@@ -52,6 +52,7 @@ defmodule PushSum do
     new_state = init_arg + 1
     new_nl = nl
     oldRatio = ratio
+
     # Upon receive, an actor should add received pair to its own corresponding values.
     {neighborS, neighborW} = message
     news = (s + neighborS) / 2
@@ -61,7 +62,7 @@ defmodule PushSum do
     if new_state > 3 do
       current = self()
       # If an actor did not change more than 10^10 in 3 consecutive rounds the actor terminates
-      difference = Float.round(newRatio - ratio, 11)
+      difference = Float.round(newRatio - oldRatio, 11)
 
       if(abs(difference) < :math.pow(10, -10)) do
         Start_Rounds.remove_me(current, new_nl)
@@ -129,9 +130,10 @@ defmodule Start_Rounds do
               difference = Float.round(ratio - oldRatio, 11)
 
               if(abs(difference) < :math.pow(10, -10)) do
-                children = List.delete(children, x)
+                _children = List.delete(children, x)
               else
                 # not sure what would go here
+                # do nothing?
               end
 
             init_arg > 0 ->
@@ -147,7 +149,7 @@ defmodule Start_Rounds do
               IO.puts("Nothing here")
           end
         else
-          children = List.delete(children, x)
+          _children = List.delete(children, x)
         end
       end
 
@@ -171,7 +173,7 @@ defmodule Start_Rounds do
 
     for x <- children do
       {_, pidx, _, _} = x
-      {init_arg, nl, s, w, ratio, oldRatio} = :sys.get_state(pidx)
+      {init_arg, _nl, _s, _w, ratio, oldRatio} = :sys.get_state(pidx)
 
       if init_arg > 3 do
         difference = Float.round(ratio - oldRatio, 11)
