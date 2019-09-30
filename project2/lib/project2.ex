@@ -21,24 +21,33 @@ defmodule Project2 do
     IO.puts("Supervisor started")
 
     # Calling each child with its state variables
-    if topology == "Full" do
-      for x <- rng do
-        nl = []
-        # first..last = rng
-        # Use String.to_atom to store neighbors
-        nl = Full_topology.full_topology(x, rng)
-        IO.puts("Got nl")
-        DySupervisor.start_child(nl, algo, x)
-        IO.puts("Child started #{x}")
-      end
-    end
+    case topology do
+      "Full" ->
+        for x <- rng do
+          nl = []
+          # first..last = rng
+          # Use String.to_atom to store neighbors
+          nl = Full_topology.full_topology(x, rng)
+          IO.puts("Got nl")
+          DySupervisor.start_child(nl, algo, x)
+          IO.puts("Child started #{x}")
+        end
 
-    if topology == "Honeycomb" do
-      poc = {}
-      mode = 0
-      first..last = rng
-      new_x = 0
-      Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
+      "Line" ->
+        for x <- rng do
+          nl = []
+          nl = Line_topology.line_topology(x, rng)
+          IO.inspect(nl, label: "Line NeighborsList is")
+          DySupervisor.start_child(nl, algo, x)
+          IO.puts("Child started #{x}")
+        end
+
+      "Honeycomb" ->
+        poc = {}
+        mode = 0
+        first..last = rng
+        new_x = 0
+        Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
     end
 
     children = DynamicSupervisor.which_children(DySupervisor)
