@@ -14,9 +14,6 @@ defmodule DySupervisor do
       child_spec = Supervisor.child_spec({PushSum, [x, nl]}, id: x, restart: :temporary)
       {:ok, child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
     end
-
-    # why is this second one here?
-    # child_spec = Supervisor.child_spec({Gossip, [x, nl]}, id: x, restart: :temporary)
   end
 
   def init(init_arg) do

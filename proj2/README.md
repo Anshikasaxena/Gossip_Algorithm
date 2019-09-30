@@ -9,7 +9,7 @@ Line -> Done
 Full -> Done
   Tested:
     Gossip 1000 --> passed
-    Push Sum; process is dead
+    Push Sum 1000 --> passed
 2D ->
   Gossip 1000 --> passed
   Push Sum; process is dead
