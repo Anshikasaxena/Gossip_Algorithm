@@ -19,7 +19,7 @@ defmodule PushSum do
   end
 
   def handle_call({:rumor, message}, _from, {init_arg, nl, s, w, ratio, oldRatio}) do
-    IO.puts(" I heard rumor")
+    IO.puts("In PushSum I heard rumor")
     new_state = init_arg + 1
     new_nl = nl
     oldRatio = ratio

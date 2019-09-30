@@ -1,5 +1,5 @@
 defmodule Start_Rounds do
-  def start_rounds(children) do
+  def start_rounds(children, algo) do
     if children == [] do
       # terminate
       # Check - might give error for few arguments
@@ -11,8 +11,10 @@ defmodule Start_Rounds do
         {_, pidx, _, _} = x
 
         if Process.alive?(pidx) do
-          {init_arg, nl} = :sys.get_state(pidx)
-
+          # {init_arg, nl} = :sys.get_state(pidx)
+          state = :sys.get_state(pidx)
+          init_arg = elem(state, 0)
+          nl = elem(state, 1)
           # IO.inspect(init_arg)
 
           values = Process.info(pidx)
@@ -46,7 +48,14 @@ defmodule Start_Rounds do
               sendto = Enum.at(sendto, 0)
               IO.puts("I #{sender} am sending a message to #{sendto}")
               # Check - Possible error
-              :ok = GenServer.call(sendto, {:rumor})
+              # :ok = GenServer.call(sendto, {:rumor})
+              # Start the first message
+              if algo == "Gossip" do
+                :ok = GenServer.call(sendto, {:rumor})
+              else
+                message = {1, 1}
+                :ok = GenServer.call(sendto, {:rumor, message})
+              end
 
             init_arg == 0 ->
               IO.puts("Nothing here")
@@ -56,7 +65,7 @@ defmodule Start_Rounds do
         end
       end
 
-      kill_em()
+      kill_em(algo)
       # start_rounds(children)
     end
   end
@@ -71,12 +80,15 @@ defmodule Start_Rounds do
     # Send a normal exit command
   end
 
-  def kill_em do
+  def kill_em(algo) do
     children = DynamicSupervisor.which_children(DySupervisor)
 
     for x <- children do
       {_, pidx, _, _} = x
-      {init_arg, nl} = :sys.get_state(pidx)
+      # {init_arg, nl} = :sys.get_state(pidx)
+      state = :sys.get_state(pidx)
+      init_arg = elem(state, 0)
+      nl = elem(state, 1)
 
       if init_arg > 3 do
         IO.puts("Here i die ")
@@ -93,6 +105,6 @@ defmodule Start_Rounds do
 
     children = DynamicSupervisor.which_children(DySupervisor)
     IO.inspect(children)
-    start_rounds(children)
+    start_rounds(children, algo)
   end
 end

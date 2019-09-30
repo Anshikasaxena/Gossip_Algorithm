@@ -23,11 +23,14 @@ defmodule Proj2 do
     # Enum.at(argv, 2) is algorithm
 
     num = String.to_integer(Enum.at(argv, 0))
-    rng = Range.new(1, num)
-    # the topology of the network
+    # Topology of the network
     topology = Enum.at(argv, 1)
+
     # Algorithm
     algo = Enum.at(argv, 2)
+
+    # Range of GenServers
+    rng = Range.new(1, num)
 
     # Starting the dynamic Server
     {:ok, _pid} = DySupervisor.start_link(1)
@@ -51,19 +54,19 @@ defmodule Proj2 do
 
         "Full" ->
           nl = Full_topology.full_topology(x, rng)
-          IO.inspect(nl, label: "Got nl")
+          IO.inspect(nl, label: "Full Neighbor List")
           DySupervisor.start_child(nl, algo, x)
           IO.puts("Child started #{x}")
 
         "twoD" ->
           nl = TwoDGridTopology.twoDtop(index, neighborsLists)
-          IO.inspect(nl, label: "NeighborsList is")
+          IO.inspect(nl, label: "2D NeighborsList is")
           DySupervisor.start_child(nl, algo, x)
           IO.puts("Child started #{x}")
 
         "threeD" ->
           nl = ThreeD.threeD_topology(num)
-          IO.inspect(nl, label: "Got nl")
+          IO.inspect(nl, label: "3D NeighborsList is")
           DySupervisor.start_child(nl, algo, x)
           IO.puts("Child started #{x}")
 
@@ -77,9 +80,14 @@ defmodule Proj2 do
     IO.inspect(children)
 
     # Start the first message
-    :ok = GenServer.call(:"1", {:rumor})
+    if algo == "Gossip" do
+      :ok = GenServer.call(:"1", {:rumor})
+    else
+      message = {1, 1}
+      :ok = GenServer.call(:"1", {:rumor, message})
+    end
 
     # Start the Rounds
-    Start_Rounds.start_rounds(children)
+    Start_Rounds.start_rounds(children, algo)
   end
 end
