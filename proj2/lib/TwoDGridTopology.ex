@@ -1,4 +1,10 @@
 defmodule TwoDGridTopology do
+  def makeTwoDTopology(rng) do
+    xyList = TwoDGridTopology.makeXYList(rng)
+    newNeighborList = TwoDGridTopology.twoD_topology(xyList, rng)
+    IO.inspect(newNeighborList, label: "newNeighborList")
+  end
+
   def makeXYList(rng) do
     xyList = []
 
@@ -13,7 +19,7 @@ defmodule TwoDGridTopology do
       end
   end
 
-  def twoDtop(node_num, rng, neighbor_map) do
+  def twoDtop(node_num, neighbor_map) do
     # have to already have all the neighbors mapped to each other
     # this should just go to index and return value
     node = Enum.at(neighbor_map, node_num)

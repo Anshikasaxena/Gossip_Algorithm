@@ -13,14 +13,6 @@ defmodule TwoDGridTopology do
       end
   end
 
-  def twoDtop(node_num, rng, neighbor_map) do
-    # have to already have all the neighbors mapped to each other
-    # this should just go to index and return value
-    node = Enum.at(neighbor_map, node_num)
-    [{x, y, i, nl}] = node
-    nl
-  end
-
   def twoD_topology(xyList, rng) do
     # for every value in xyList
     newList =
@@ -62,6 +54,14 @@ defmodule TwoDGridTopology do
       end)
 
     newList
+  end
+
+  def twoDtop(node_num, neighbor_map) do
+    # have to already have all the neighbors mapped to each other
+    # this should just go to index and return value
+    node = Enum.at(neighbor_map, node_num)
+    [{x, y, i, nl}] = node
+    nl
   end
 
   def difference(x1, y1, x2, y2) do

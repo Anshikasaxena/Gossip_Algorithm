@@ -34,8 +34,7 @@ defmodule Proj2 do
     IO.puts("Supervisor started")
 
     # create xyList before anything even starts if needed
-    xyList = TwoDGridTopology.makeXYList(rng)
-    IO.inspect(xyList, label: "xyList")
+    neighborsLists = TwoDGridTopology.makeTwoDTopology(rng)
 
     # Calling each child with its state variables
     for x <- rng do
@@ -45,25 +44,33 @@ defmodule Proj2 do
       # get neighbor list depending on topology
       case topology do
         "Line" ->
-          IO.puts("Need to implement line?")
+          nl = Line_topology.line_topology(x, rng)
+          IO.inspect(nl, label: "Got nl")
+          DySupervisor.start_child(nl, algo, x)
+          IO.puts("Child started #{x}")
 
         "Full" ->
           nl = Full_topology.full_topology(x, rng)
+          IO.inspect(nl, label: "Got nl")
+          DySupervisor.start_child(nl, algo, x)
+          IO.puts("Child started #{x}")
 
         "twoD" ->
-          nl = TwoDGridTopology.twoD_topology(xyList, rng)
+          nl = TwoDGridTopology.twoDtop(index, neighborsLists)
+          IO.inspect(nl, label: "NeighborsList is")
+          DySupervisor.start_child(nl, algo, x)
+          IO.puts("Child started #{x}")
 
         "threeD" ->
           nl = ThreeD.threeD_topology(num)
+          IO.inspect(nl, label: "Got nl")
+          DySupervisor.start_child(nl, algo, x)
+          IO.puts("Child started #{x}")
 
         _ ->
           IO.puts("Incorrect topology type")
           # TO DO: Program should stop here...
       end
-
-      IO.inspect(nl, label: "Got nl")
-      DySupervisor.start_child(nl, algo, x)
-      IO.puts("Child started #{x}")
     end
 
     children = DynamicSupervisor.which_children(DySupervisor)
