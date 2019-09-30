@@ -23,14 +23,14 @@ defmodule ThreeD do
     actor7 = {1, 1, 1}
 
     # actor neighbor list = front, back, right, left, top, and bottom
-    actor0nl = [1, 1, 4, 4, 2, 2]
-    actor1nl = [0, 0, 5, 5, 3, 3]
-    actor2nl = [3, 3, 6, 6, 0, 0]
-    actor3nl = [2, 2, 7, 7, 1, 1]
-    actor4nl = [5, 5, 0, 0, 6, 6]
-    actor5nl = [4, 4, 1, 1, 7, 7]
-    actor6nl = [7, 7, 2, 2, 4, 4]
-    actor7nl = [6, 6, 3, 3, 5, 5]
+    actor0nl = [2, 2, 5, 5, 3, 3]
+    actor1nl = [1, 1, 6, 6, 4, 4]
+    actor2nl = [4, 4, 7, 7, 1, 1]
+    actor3nl = [3, 3, 8, 8, 2, 2]
+    actor4nl = [6, 6, 1, 1, 7, 7]
+    actor5nl = [5, 5, 2, 2, 8, 8]
+    actor6nl = [8, 8, 3, 3, 5, 5]
+    actor7nl = [7, 7, 4, 4, 6, 6]
 
     xyzList =
       for cube <- cubeRange do

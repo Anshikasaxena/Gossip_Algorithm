@@ -17,7 +17,8 @@ Full -> Done
   3d they are all individual cubes
     - [ ] instead have front check front element - 1
     - [ ] instead have back check back element + 1
-  Termination
+    Gossip 1000 --> passed
+    Push Sum; process is dead
 
 Honeycomb ->
 Honeycomb Random ->

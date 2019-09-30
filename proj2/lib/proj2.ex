@@ -41,39 +41,49 @@ defmodule Proj2 do
     neighborsLists3 = ThreeD.threeD_topology(num)
 
     # Calling each child with its state variables
-    for x <- rng do
-      nl = []
-      index = x - 1
+    # rng has to round if Top is 3D
+    if topology != "threeD" do
+      for x <- rng do
+        nl = []
+        index = x - 1
 
-      # get neighbor list depending on topology
-      case topology do
-        "Line" ->
-          nl = Line_topology.line_topology(x, rng)
-          IO.inspect(nl, label: "Line NeighborsList is")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
+        # get neighbor list depending on topology
+        case topology do
+          "Line" ->
+            nl = Line_topology.line_topology(x, rng)
+            IO.inspect(nl, label: "Line NeighborsList is")
+            DySupervisor.start_child(nl, algo, x)
+            IO.puts("Child started #{x}")
 
-        "Full" ->
-          nl = Full_topology.full_topology(x, rng)
-          IO.inspect(nl, label: "Full Neighbor List")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
+          "Full" ->
+            nl = Full_topology.full_topology(x, rng)
+            IO.inspect(nl, label: "Full Neighbor List")
+            DySupervisor.start_child(nl, algo, x)
+            IO.puts("Child started #{x}")
 
-        "twoD" ->
-          nl = TwoDGridTopology.twoDtop(index, neighborsLists2)
-          IO.inspect(nl, label: "2D NeighborsList is")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
+          "twoD" ->
+            nl = TwoDGridTopology.twoDtop(index, neighborsLists2)
+            IO.inspect(nl, label: "2D NeighborsList is")
+            DySupervisor.start_child(nl, algo, x)
+            IO.puts("Child started #{x}")
 
-        "threeD" ->
-          nl = ThreeD.threeDtop(index, neighborsLists3)
-          IO.inspect(nl, label: "3D NeighborsList is")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
+          _ ->
+            IO.puts("Incorrect topology type")
+            # TO DO: Program should stop here...
+        end
+      end
+    else
+      newRangeNum = ThreeD.roundUp(num)
+      # Range of GenServers
+      rng = Range.new(1, newRangeNum)
 
-        _ ->
-          IO.puts("Incorrect topology type")
-          # TO DO: Program should stop here...
+      for x <- rng do
+        nl = []
+        index = x - 1
+        nl = ThreeD.threeDtop(index, neighborsLists3)
+        IO.inspect(nl, label: "3D NeighborsList is")
+        DySupervisor.start_child(nl, algo, x)
+        IO.puts("Child started #{x}")
       end
     end
 
