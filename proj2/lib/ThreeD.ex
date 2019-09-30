@@ -41,41 +41,49 @@ defmodule ThreeD do
           case index do
             1 ->
               actor0nl = Enum.map(actor0nl, fn x -> x + cube * 8 end)
+              actor0nl = Enum.map(actor0nl, fn x -> :"#{x}" end)
               cord = {0, 0, 0, cube, i, actor0nl}
               _xyzList = List.insert_at(xyzList, i, cord)
 
             2 ->
               actor1nl = Enum.map(actor1nl, fn x -> x + cube * 8 end)
+              actor1nl = Enum.map(actor1nl, fn x -> :"#{x}" end)
               cord = {0, 0, 1, cube, i, actor1nl}
               _xyzList = List.insert_at(xyzList, i, cord)
 
             3 ->
               actor2nl = Enum.map(actor2nl, fn x -> x + cube * 8 end)
+              actor2nl = Enum.map(actor2nl, fn x -> :"#{x}" end)
               cord = {0, 1, 0, cube, i, actor2nl}
               _xyzList = List.insert_at(xyzList, i, cord)
 
             4 ->
               actor3nl = Enum.map(actor3nl, fn x -> x + cube * 8 end)
+              actor3nl = Enum.map(actor3nl, fn x -> :"#{x}" end)
               cord = {0, 1, 1, cube, i, actor3nl}
               _xyzList = List.insert_at(xyzList, i, cord)
 
             5 ->
               actor4nl = Enum.map(actor4nl, fn x -> x + cube * 8 end)
+              actor4nl = Enum.map(actor4nl, fn x -> :"#{x}" end)
               cord = {1, 0, 0, cube, i, actor4nl}
               _xyzList = List.insert_at(xyzList, i, cord)
 
             6 ->
               actor5nl = Enum.map(actor5nl, fn x -> x + cube * 8 end)
+              actor5nl = Enum.map(actor5nl, fn x -> :"#{x}" end)
               cord = {1, 0, 1, cube, i, actor5nl}
               _xyzList = List.insert_at(xyzList, i, cord)
 
             7 ->
               actor6nl = Enum.map(actor6nl, fn x -> x + cube * 8 end)
+              actor6nl = Enum.map(actor6nl, fn x -> :"#{x}" end)
               cord = {1, 1, 0, cube, i, actor6nl}
               _xyzList = List.insert_at(xyzList, i, cord)
 
             8 ->
               actor7nl = Enum.map(actor7nl, fn x -> x + cube * 8 end)
+              actor7nl = Enum.map(actor7nl, fn x -> :"#{x}" end)
               cord = {1, 1, 1, cube, i, actor7nl}
               _xyzList = List.insert_at(xyzList, i, cord)
           end
@@ -94,7 +102,7 @@ defmodule ThreeD do
     end
   end
 
-  def threeDtop(node_num, rng, neighbor_map) do
+  def threeDtop(node_num, neighbor_map) do
     # have to already have all the neighbors mapped to each other
     # this should just go to index and return value
     node = Enum.at(neighbor_map, node_num)

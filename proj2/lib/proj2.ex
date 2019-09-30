@@ -36,8 +36,9 @@ defmodule Proj2 do
     {:ok, _pid} = DySupervisor.start_link(1)
     IO.puts("Supervisor started")
 
-    # create xyList before anything even starts if needed
-    neighborsLists = TwoDGridTopology.makeTwoDTopology(rng)
+    # create neighborLists before anything even starts if needed
+    neighborsLists2 = TwoDGridTopology.makeTwoDTopology(rng)
+    neighborsLists3 = ThreeD.threeD_topology(num)
 
     # Calling each child with its state variables
     for x <- rng do
@@ -59,13 +60,13 @@ defmodule Proj2 do
           IO.puts("Child started #{x}")
 
         "twoD" ->
-          nl = TwoDGridTopology.twoDtop(index, neighborsLists)
+          nl = TwoDGridTopology.twoDtop(index, neighborsLists2)
           IO.inspect(nl, label: "2D NeighborsList is")
           DySupervisor.start_child(nl, algo, x)
           IO.puts("Child started #{x}")
 
         "threeD" ->
-          nl = ThreeD.threeD_topology(num)
+          nl = ThreeD.threeDtop(index, neighborsLists3)
           IO.inspect(nl, label: "3D NeighborsList is")
           DySupervisor.start_child(nl, algo, x)
           IO.puts("Child started #{x}")

@@ -31,7 +31,8 @@ defmodule Start_Rounds do
               children = List.delete(children, x)
               # Send a normal exit command
               # Check - Possible error
-              IO.puts("My neighbors are dead , here i die ")
+              stringPid = Kernel.inspect(pidx)
+              IO.puts("My neighbors are dead , here i #{sender} die ")
               :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
               IO.inspect(children)
               childkilled = DynamicSupervisor.which_children(DySupervisor)
@@ -44,7 +45,7 @@ defmodule Start_Rounds do
 
             # remove_me(pidx,nl)
 
-            init_arg > 0 ->
+            init_arg >= 0 ->
               # pick a random neighbor and start sending message
               sendto = Enum.take_random(nl, 1)
               sendto = Enum.at(sendto, 0)
@@ -60,8 +61,9 @@ defmodule Start_Rounds do
                 :ok = GenServer.call(sendto, {:rumor, message})
               end
 
-            init_arg == 0 ->
-              IO.puts("Nothing here")
+              # QUESTION: why was this written like this? 
+              # init_arg == 0 ->
+              #   IO.puts("Nothing here")
           end
         else
           children = List.delete(children, x)

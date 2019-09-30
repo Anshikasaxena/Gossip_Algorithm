@@ -11,12 +11,9 @@ Full -> Done
     Gossip 1000 --> passed
     Push Sum; process is dead
 2D ->
-  Fix weird ‘\a’ etc error
-  No neighbors error
-  Never terminating 
-  Termination
+  Gossip 1000 --> passed
+  Push Sum; process is dead
 3D ->
-  Fix weird ‘\a’ etc error
   3d they are all individual cubes
     - [ ] instead have front check front element - 1
     - [ ] instead have back check back element + 1
