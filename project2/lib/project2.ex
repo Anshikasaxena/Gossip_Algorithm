@@ -62,6 +62,16 @@ defmodule Project2 do
         first..last = rng
         new_x = 0
         Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
+
+      "Honeycomb_rand" ->
+        poc = {}
+        mode = 0
+        first..last = rng
+        new_x = 0
+        Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
+        nebhrs_lst = Enum.to_list(rng)
+        # Additional one neighbor for everyone
+        Honeycomb_rand.add_neighbor(first, last, nebhrs_lst)
     end
 
     children = DynamicSupervisor.which_children(DySupervisor)
@@ -492,5 +502,43 @@ defmodule Honeycomb do
     rng = Range.new(new_x, last)
 
     get_nl(rng, poc, mode, new_x, last, algo)
+  end
+end
+
+defmodule Honeycomb_rand do
+  def add_neighbor(first, last, nebhrs_lst) when first == last do
+    IO.puts("Hey in stopping function ")
+    x = last
+    x_name = :"#{x}"
+    rand_nehbr = pick_rand(nebhrs_lst, x)
+    :ok = GenServer.call(x_name, {:update_nl, :"#{rand_nehbr}"})
+    :ok = GenServer.call(:"#{rand_nehbr}", {:update_nl, x_name})
+  end
+
+  def add_neighbor(first, last, nebhrs_lst) do
+    x = first
+    new_first = x + 1
+    x_name = :"#{x}"
+    rand_nehbr = pick_rand(nebhrs_lst, x)
+
+    # Updating both lists of nodes
+    :ok = GenServer.call(x_name, {:update_nl, :"#{rand_nehbr}"})
+    :ok = GenServer.call(:"#{rand_nehbr}", {:update_nl, x_name})
+
+    nebhrs_lst = List.delete(nebhrs_lst, rand_nehbr)
+
+    add_neighbor(new_first, last, nebhrs_lst)
+  end
+
+  def pick_rand(nebhrs_lst, x) do
+    IO.puts("People left for picking")
+    IO.inspect(nebhrs_lst)
+    rand_nehbr = Enum.random(nebhrs_lst)
+
+    if rand_nehbr != x do
+      rand_nehbr = rand_nehbr
+    else
+      pick_rand(nebhrs_lst, x)
+    end
   end
 end
