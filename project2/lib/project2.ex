@@ -21,73 +21,86 @@ defmodule Project2 do
     IO.puts("Supervisor started")
 
     # Calling each child with its state variables
-    case topology do
-      "Full" ->
-        for x <- rng do
-          nl = []
-          # first..last = rng
-          # Use String.to_atom to store neighbors
-          nl = Full_topology.full_topology(x, rng)
-          IO.puts("Got nl")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
-        end
+    newPercent =
+      case topology do
+        "Full" ->
+          for x <- rng do
+            nl = []
+            # first..last = rng
+            # Use String.to_atom to store neighbors
+            nl = Full_topology.full_topology(x, rng)
+            IO.puts("Got nl")
+            DySupervisor.start_child(nl, algo, x)
+            IO.puts("Child started #{x}")
+          end
 
-      "Line" ->
-        for x <- rng do
-          nl = []
-          nl = Line_topology.line_topology(x, rng)
-          IO.inspect(nl, label: "Line NeighborsList is")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
-        end
+        "Line" ->
+          for x <- rng do
+            nl = []
+            nl = Line_topology.line_topology(x, rng)
+            IO.inspect(nl, label: "Line NeighborsList is")
+            DySupervisor.start_child(nl, algo, x)
+            IO.puts("Child started #{x}")
+          end
 
-      "twoD" ->
-        # create neighborLists before anything even starts if needed
-        neighborsLists2 = TwoDGridTopology.makeTwoDTopology(rng)
-        # percentage = TwoDGridTopology.makePercentage(neighborsLists2, num)
+        "twoD" ->
+          # create neighborLists before anything even starts if needed
+          neighborsLists2 = TwoDGridTopology.makeTwoDTopology(rng)
+          percentage = TwoDGridTopology.makePercentage(neighborsLists2, num)
 
-        for x <- rng do
-          nl = []
-          index = x - 1
-          nl = TwoDGridTopology.twoDtop(index, neighborsLists2)
-          IO.inspect(nl, label: "2D NeighborsList is")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
-        end
+          for x <- rng do
+            nl = []
+            index = x - 1
+            nl = TwoDGridTopology.twoDtop(index, neighborsLists2)
+            IO.inspect(nl, label: "2D NeighborsList is")
+            DySupervisor.start_child(nl, algo, x)
+            IO.puts("Child started #{x}")
+          end
 
-      "threeD" ->
-        # create neighborLists before anything even starts if needed
-        cube = ThreeD.threeD_topology(num)
-        IO.inspect(cube, label: "Cube ")
+          percent_nodes = percentage
 
-        for x <- cube do
-          {index, node, neighbors} = x
-          child_num = String.to_integer(Atom.to_string(index))
-          nl = []
-          nl = ThreeD.threeDtop(index, cube)
-          IO.inspect(nl, label: "#{child_num} 3D NeighborsList is")
-          DySupervisor.start_child(nl, algo, child_num)
-          IO.puts("Child started #{child_num}")
-        end
+        "threeD" ->
+          # create neighborLists before anything even starts if needed
+          cube = ThreeD.threeD_topology(num)
+          IO.inspect(cube, label: "Cube ")
 
-      "Honeycomb" ->
-        poc = {}
-        mode = 0
-        first..last = rng
-        new_x = 0
-        Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
+          for x <- cube do
+            {index, node, neighbors} = x
+            child_num = String.to_integer(Atom.to_string(index))
+            nl = []
+            nl = ThreeD.threeDtop(index, cube)
+            IO.inspect(nl, label: "#{child_num} 3D NeighborsList is")
+            DySupervisor.start_child(nl, algo, child_num)
+            IO.puts("Child started #{child_num}")
+          end
 
-      "Honeycomb_rand" ->
-        poc = {}
-        mode = 0
-        first..last = rng
-        new_x = 0
-        Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
-        nebhrs_lst = Enum.to_list(rng)
-        # Additional one neighbor for everyone
-        Honeycomb_rand.add_neighbor(first, last, nebhrs_lst)
-    end
+        "Honeycomb" ->
+          poc = {}
+          mode = 0
+          first..last = rng
+          new_x = 0
+          Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
+
+        "Honeycomb_rand" ->
+          poc = {}
+          mode = 0
+          first..last = rng
+          new_x = 0
+          Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
+          nebhrs_lst = Enum.to_list(rng)
+          # Additional one neighbor for everyone
+          Honeycomb_rand.add_neighbor(first, last, nebhrs_lst)
+      end
+
+    percent_nodes =
+      if(topology == "twoD") do
+        percent_nodes = newPercent
+      else
+        percent_nodes
+      end
+
+    percent_nodes = percent_nodes
+    IO.inspect(percent_nodes, label: "percent_nodes from main")
 
     children = DynamicSupervisor.which_children(DySupervisor)
     IO.inspect(children)

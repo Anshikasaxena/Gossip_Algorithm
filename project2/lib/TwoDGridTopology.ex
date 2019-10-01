@@ -100,9 +100,11 @@ defmodule TwoDGridTopology do
   def makePercentage(neighborList, numNodes) do
     # get node 1 --> get all nodes directly or indirectly
 
-    onesNeighbor = Enum.at(neighborList, 0)
-    [{x1, y1, i1, nl1}] = onesNeighbor
-    IO.inspect(nl1, label: "onesNeighborList")
+    onesNeighbor = getOnesNeighbors(neighborList)
+    onesNeighborList = Enum.uniq(onesNeighbor)
+    # [{x1, y1, i1, nl1}] = onesNeighbor
+    IO.inspect(onesNeighborList, label: "onesNeighborList")
+    allPositives = Enum.count(onesNeighborList)
 
     zeroNeighbors = getZeroNeighbors(neighborList)
     # add all numbers that are
@@ -110,14 +112,16 @@ defmodule TwoDGridTopology do
     IO.inspect(allZeros, label: "Make Zero Neighbor List")
 
     # recurse down my neighborList
-    num1Neighbors = getOneConnected(nl1, 0, 0, neighborList)
-    IO.inspect(num1Neighbors, label: "Make Percentage New Neighbor List")
-
-    # add all numbers that are
-    allPositives = Enum.count(num1Neighbors)
-
+    # num1Neighbors = getOneConnected(nl1, 0, 0, neighborList)
+    # IO.inspect(num1Neighbors, label: "Make Percentage New Neighbor List")
+    #
+    # # add all numbers that are
+    #
+    #
     limit = allPositives + allZeros
     # give as new percentage
+    percentage = numNodes - limit
+    # IO.inspect(percentage, label: "percent_nodes from twoD")
   end
 
   def getZeroNeighbors(neighborList) do
@@ -169,13 +173,60 @@ defmodule TwoDGridTopology do
   def getOnesNeighbors(neighborList) do
     onesNeighbor = Enum.at(neighborList, 0)
     [{x1, y1, i1, nl1}] = onesNeighbor
-    IO.inspect(nl1, label: "onesNeighborList")
-    getEveryoneInOnesNeighbors(nl1, neighborList)
+    nl1
+    elem = 0
+    onesNeighborList = getEveryoneInOnesNeighbors(nl1, neighborList, elem)
+    IO.inspect(onesNeighborList, label: "onesNeighborList")
+    # onesNeighborList = List.flatten(onesNeighborList)
   end
 
-  def getEveryoneInOnesNeighbors(nl, neighborList) do
-    for neighbor <- nl do
-      # get my neighbor list from large neighborList
+  def getEveryoneInOnesNeighbors(nl, neighborList, elem) do
+    count = Enum.count(nl) - 1
+    IO.inspect(count, label: "count")
+
+    if(elem <= count) do
+      firstNeighbor = Enum.at(nl, elem)
+      IO.inspect(firstNeighbor, label: "firstNeighbor")
+      index = String.to_integer(Atom.to_string(firstNeighbor))
+      # IO.inspect(index, label: "firstNeighbor index")
+      ind = index - 1
+      node = Enum.at(neighborList, ind)
+      [{x2, y2, i2, nl2}] = node
+      IO.inspect(nl2, label: "#{i2}'s neighborList:'")
+      thirdLevel(nl2, nl, neighborList, elem)
+    else
+      IO.puts("In base case")
+      nl
     end
   end
+
+  def thirdLevel(nl2, nl, neighborList, elem) do
+    IO.puts("In third level")
+    IO.inspect(nl, label: "nl")
+    IO.inspect(nl2, label: "nl2")
+
+    nlToFlat =
+      for neighbor <- nl2 do
+        IO.inspect(neighbor, label: "neighbor")
+        # check if I'm not in one's List
+        nl =
+          if neighbor not in nl do
+            IO.puts("I'm getting picked")
+            # add myself to nl
+            nl = nl ++ [neighbor]
+          else
+            IO.puts("Not picked")
+            nl
+          end
+      end
+
+    nlToUniq = List.flatten(nlToFlat)
+    nl = Enum.uniq(nlToUniq)
+
+    IO.inspect(nl, label: "new nl")
+    elem = elem + 1
+    getEveryoneInOnesNeighbors(nl, neighborList, elem)
+  end
+
+  # IO.inspect(secondLevel, label: "secondLevel")
 end
