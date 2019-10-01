@@ -20,13 +20,13 @@ defmodule PushSum do
 
   def handle_call({:update_nl, x}, _from, {num_heard, nl, s, w, ratio, oldRatio}) do
     new_nl = nl ++ [x]
-    IO.puts("updating ..")
-    IO.inspect(new_nl)
+    # IO.puts("updating ..")
+    # IO.inspect(new_nl)
     {:reply, :ok, {num_heard, new_nl, s, w, ratio, oldRatio}}
   end
 
   def handle_call({:rumor, message}, _from, {num_heard, nl, s, w, ratio, oldRatio}) do
-    IO.puts("In PushSum I heard the rumor")
+    # IO.puts("In PushSum I heard the rumor")
     new_state = num_heard + 1
     new_nl = nl
     oldRatio = ratio
@@ -43,12 +43,12 @@ defmodule PushSum do
 
       if(abs(difference) < :math.pow(10, -10)) do
         current = self()
-        IO.puts("My DEAD ratio is #{newRatio}")
+        # IO.puts("My DEAD ratio is #{newRatio}")
         Start_Rounds.remove_me(current, new_nl)
         {:reply, :ok, {new_state, new_nl, news, neww, newRatio, oldRatio}}
       else
         new_state = 1
-        IO.inspect(self(), label: "I'm resetting state because my difference was #{difference}")
+        # IO.inspect(self(), label: "I'm resetting state because my difference was #{difference}")
         {:reply, :ok, {new_state, new_nl, news, neww, newRatio, oldRatio}}
       end
     else
@@ -58,8 +58,8 @@ defmodule PushSum do
 
   def handle_call({:RemoveMe, sender}, _from, {num_heard, nl, s, w, ratio, oldRatio}) do
     new_nl = List.delete(nl, sender)
-    IO.puts("See i removed ya ")
-    IO.inspect(new_nl)
+    # IO.puts("See i removed ya ")
+    # IO.inspect(new_nl)
     {:reply, :ok, {num_heard, new_nl, s, w, ratio, oldRatio}}
   end
 

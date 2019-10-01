@@ -2,7 +2,7 @@ defmodule TwoDGridTopology do
   def makeTwoDTopology(rng) do
     xyList = TwoDGridTopology.makeXYList(rng)
     newNeighborList = TwoDGridTopology.twoD_topology(xyList, rng)
-    IO.inspect(newNeighborList, label: "newNeighborList")
+    # IO.inspect(newNeighborList, label: "newNeighborList")
   end
 
   def makeXYList(rng) do
@@ -44,7 +44,7 @@ defmodule TwoDGridTopology do
               difference = difference(x1, y1, x2, y2)
               # IO.inspect(difference, label: "difference is")
               if(difference <= 1) do
-                IO.inspect(i2, label: "#{i1} has as a new neighbor")
+                # IO.inspect(i2, label: "#{i1} has as a new neighbor")
                 new_neighbors = nl1 ++ [:"#{i2}"]
               else
                 new_neighbors = "dumb"
@@ -68,7 +68,7 @@ defmodule TwoDGridTopology do
     [{x2, y2, i2, nl2}] = List.first(newList)
 
     if(nl2 == []) do
-      IO.inspect("i have no friends")
+      # IO.inspect("i have no friends")
       newxyList = []
 
       newxyList =
@@ -103,13 +103,13 @@ defmodule TwoDGridTopology do
     onesNeighbor = getOnesNeighbors(neighborList)
     onesNeighborList = Enum.uniq(onesNeighbor)
     # [{x1, y1, i1, nl1}] = onesNeighbor
-    IO.inspect(onesNeighborList, label: "onesNeighborList")
+    # IO.inspect(onesNeighborList, label: "onesNeighborList")
     allPositives = Enum.count(onesNeighborList)
 
     zeroNeighbors = getZeroNeighbors(neighborList)
     # add all numbers that are
     allZeros = Enum.count(zeroNeighbors)
-    IO.inspect(allZeros, label: "Make Zero Neighbor List")
+    # IO.inspect(allZeros, label: "Make Zero Neighbor List")
 
     # recurse down my neighborList
     # num1Neighbors = getOneConnected(nl1, 0, 0, neighborList)
@@ -132,23 +132,23 @@ defmodule TwoDGridTopology do
   end
 
   def getOneConnected(node1Neighbors, node_location, increment, neighborList) do
-    IO.inspect(node1Neighbors, label: "node1Neighbors")
+    # IO.inspect(node1Neighbors, label: "node1Neighbors")
     nodeIndex = Enum.at(node1Neighbors, increment)
-    IO.inspect(nodeIndex, label: "nodeIndex")
+    # IO.inspect(nodeIndex, label: "nodeIndex")
     # get nodeIndex's neighbors
     index = String.to_integer(Atom.to_string(nodeIndex))
-    IO.inspect(index, label: "index")
+    # IO.inspect(index, label: "index")
     ind = index - 1
     node2 = Enum.at(neighborList, ind)
-    IO.inspect(node2, label: "node2")
+    # IO.inspect(node2, label: "node2")
     [{x2, y2, i2, nl2}] = node2
 
     newNeighbors =
       for node3Index <- nl2 do
         index2 = String.to_integer(Atom.to_string(node3Index)) - 1
-        IO.inspect(index2, label: "index2")
+        # IO.inspect(index2, label: "index2")
         node3 = Enum.at(neighborList, index2)
-        IO.inspect(node3, label: "node3")
+        # IO.inspect(node3, label: "node3")
         [{x3, y3, i3, nl3}] = node3
 
         if(:"#{i3}" not in node1Neighbors) do
@@ -157,13 +157,13 @@ defmodule TwoDGridTopology do
       end
 
     maxNodes = Enum.count(newNeighbors)
-    IO.inspect(maxNodes, label: "count")
+    # IO.inspect(maxNodes, label: "count")
     maxNum = maxNodes - 1
-    IO.inspect(maxNum, label: "count2 ")
+    # IO.inspect(maxNum, label: "count2 ")
 
     if(increment < maxNum) do
       increment = increment + 1
-      IO.inspect(newNeighbors, label: "node1Neighbors")
+      # IO.inspect(newNeighbors, label: "node1Neighbors")
       getOneConnected(newNeighbors, node_location, increment, neighborList)
     else
       newNeighbors
@@ -176,46 +176,46 @@ defmodule TwoDGridTopology do
     nl1
     elem = 0
     onesNeighborList = getEveryoneInOnesNeighbors(nl1, neighborList, elem)
-    IO.inspect(onesNeighborList, label: "onesNeighborList")
+    # IO.inspect(onesNeighborList, label: "onesNeighborList")
     # onesNeighborList = List.flatten(onesNeighborList)
   end
 
   def getEveryoneInOnesNeighbors(nl, neighborList, elem) do
     count = Enum.count(nl) - 1
-    IO.inspect(count, label: "count")
+    # IO.inspect(count, label: "count")
 
     if(elem <= count) do
       firstNeighbor = Enum.at(nl, elem)
-      IO.inspect(firstNeighbor, label: "firstNeighbor")
+      # IO.inspect(firstNeighbor, label: "firstNeighbor")
       index = String.to_integer(Atom.to_string(firstNeighbor))
       # IO.inspect(index, label: "firstNeighbor index")
       ind = index - 1
       node = Enum.at(neighborList, ind)
       [{x2, y2, i2, nl2}] = node
-      IO.inspect(nl2, label: "#{i2}'s neighborList:'")
+      # IO.inspect(nl2, label: "#{i2}'s neighborList:'")
       thirdLevel(nl2, nl, neighborList, elem)
     else
-      IO.puts("In base case")
+      # IO.puts("In base case")
       nl
     end
   end
 
   def thirdLevel(nl2, nl, neighborList, elem) do
-    IO.puts("In third level")
-    IO.inspect(nl, label: "nl")
-    IO.inspect(nl2, label: "nl2")
+    # IO.puts("In third level")
+    # IO.inspect(nl, label: "nl")
+    # IO.inspect(nl2, label: "nl2")
 
     nlToFlat =
       for neighbor <- nl2 do
-        IO.inspect(neighbor, label: "neighbor")
+        # IO.inspect(neighbor, label: "neighbor")
         # check if I'm not in one's List
         nl =
           if neighbor not in nl do
-            IO.puts("I'm getting picked")
+            # IO.puts("I'm getting picked")
             # add myself to nl
             nl = nl ++ [neighbor]
           else
-            IO.puts("Not picked")
+            # IO.puts("Not picked")
             nl
           end
       end
@@ -223,7 +223,7 @@ defmodule TwoDGridTopology do
     nlToUniq = List.flatten(nlToFlat)
     nl = Enum.uniq(nlToUniq)
 
-    IO.inspect(nl, label: "new nl")
+    # IO.inspect(nl, label: "new nl")
     elem = elem + 1
     getEveryoneInOnesNeighbors(nl, neighborList, elem)
   end
