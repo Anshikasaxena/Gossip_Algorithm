@@ -56,6 +56,21 @@ defmodule Project2 do
           IO.puts("Child started #{x}")
         end
 
+      "threeD" ->
+        # create neighborLists before anything even starts if needed
+        cube = ThreeD.threeD_topology(num)
+        IO.inspect(cube, label: "Cube ")
+
+        for x <- cube do
+          {index, node, neighbors} = x
+          child_num = String.to_integer(Atom.to_string(index))
+          nl = []
+          nl = ThreeD.threeDtop(index, cube)
+          IO.inspect(nl, label: "#{child_num} 3D NeighborsList is")
+          DySupervisor.start_child(nl, algo, child_num)
+          IO.puts("Child started #{child_num}")
+        end
+
       "Honeycomb" ->
         poc = {}
         mode = 0
