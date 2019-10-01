@@ -1,88 +1,3 @@
-defmodule Project2 do
-  def main(argv) do
-    # Main Application
-
-    # number of Nodes
-    num = String.to_integer(Enum.at(argv, 0))
-    # Topology of the network
-    topology = Enum.at(argv, 1)
-
-    # Algorithm
-    algo = Enum.at(argv, 2)
-
-    # Range of GenServers
-    rng = Range.new(1, num)
-
-    percent_nodes = num - round(0.90 * num)
-    rng = Range.new(1, num)
-
-    # Starting the dynamic Server
-    {:ok, pid} = DySupervisor.start_link(1)
-    IO.puts("Supervisor started")
-
-    # Calling each child with its state variables
-    case topology do
-      "Full" ->
-        for x <- rng do
-          nl = []
-          # first..last = rng
-          # Use String.to_atom to store neighbors
-          nl = Full_topology.full_topology(x, rng)
-          IO.puts("Got nl")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
-        end
-
-      "Line" ->
-        for x <- rng do
-          nl = []
-          nl = Line_topology.line_topology(x, rng)
-          IO.inspect(nl, label: "Line NeighborsList is")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
-        end
-
-      "twoD" ->
-        # create neighborLists before anything even starts if needed
-        neighborsLists2 = TwoDGridTopology.makeTwoDTopology(rng)
-        # percentage = TwoDGridTopology.makePercentage(neighborsLists2, num)
-
-        for x <- rng do
-          nl = []
-          index = x - 1
-          nl = TwoDGridTopology.twoDtop(index, neighborsLists2)
-          IO.inspect(nl, label: "2D NeighborsList is")
-          DySupervisor.start_child(nl, algo, x)
-          IO.puts("Child started #{x}")
-        end
-
-      "Honeycomb" ->
-        poc = {}
-        mode = 0
-        first..last = rng
-        new_x = 0
-        Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
-    end
-
-    children = DynamicSupervisor.which_children(DySupervisor)
-    IO.inspect(children)
-    # Enum.each(children,fn x-> GenServer.cast(x,{:get_neig,})
-
-    # Start the first message
-    # A check if names have been assigned correctly
-    # Start the first message
-    if algo == "Gossip" do
-      :ok = GenServer.call(:"1", {:rumor})
-    else
-      message = {1, 1}
-      :ok = GenServer.call(:"1", {:rumor, message})
-    end
-
-    # Start the Rounds
-    Start_Rounds.start_rounds(children, algo, percent_nodes)
-  end
-end
-
 defmodule DySupervisor do
   use DynamicSupervisor
 
@@ -94,11 +9,14 @@ defmodule DySupervisor do
   def start_child(nl, algo, x) do
     if algo == "Gossip" do
       child_spec = Supervisor.child_spec({Gossip, [x, nl]}, id: x, restart: :temporary)
-      {:ok, child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
-    else
-      child_spec = Supervisor.child_spec({PushSum, [x, nl]}, id: x, restart: :temporary)
-      {:ok, child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
     end
+
+    child_spec = Supervisor.child_spec({Gossip, [x, nl]}, id: x, restart: :temporary)
+    # if algo == "Push-Sum" do
+    # children = Supervisor.child_spec({Push - Sum, [x, 1, nl]}, id: x, restart: :temporary)
+    # end
+
+    {:ok, child} = DynamicSupervisor.start_child(__MODULE__, child_spec)
   end
 
   def init(init_arg) do
@@ -155,10 +73,10 @@ defmodule Gossip do
 end
 
 defmodule Start_Rounds do
-  def start_rounds(children, algo, percent_nodes) do
+  def start_rounds(children, percent_nodes) do
     if children == [] do
       # terminate
-      # Check - might give error for few arguments
+      # Check - might give error for few arguments 
       IO.puts("Stopping the Supervisor")
       :ok = DynamicSupervisor.stop(DySupervisor)
       IO.puts("Uh oh ")
@@ -167,11 +85,7 @@ defmodule Start_Rounds do
         {_, pidx, _, _} = x
 
         if Process.alive?(pidx) do
-          # {init_arg, nl} = :sys.get_state(pidx)
-
-          state = :sys.get_state(pidx)
-          init_arg = elem(state, 0)
-          nl = elem(state, 1)
+          {init_arg, nl} = :sys.get_state(pidx)
 
           # IO.inspect(init_arg)
 
@@ -185,37 +99,28 @@ defmodule Start_Rounds do
               # Remove the process from the list of children
               IO.puts("Your neigbors are dead and so are you")
               children = List.delete(children, x)
-              # Send a normal exit command
+              # Send a normal exit command 
               # Check - Possible error
               IO.puts("My neighbors are dead , here i die ")
               :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
-              IO.inspect(children, label: "One")
+              IO.inspect(children)
               childkilled = DynamicSupervisor.which_children(DySupervisor)
-              IO.inspect(childkilled, label: "Two")
+              IO.inspect(childkilled)
 
             init_arg > 3 ->
               # Remove the process from the list of children
-              ## do here in start rounds
+              ## do here in start rounds 
               children = List.delete(children, x)
 
             # remove_me(pidx,nl)
 
             init_arg > 0 ->
-              # pick a random neighbor and start sending message
+              # pick a random neighbor and start sending message 
               sendto = Enum.take_random(nl, 1)
               sendto = Enum.at(sendto, 0)
-
               IO.puts("I #{sender} am sending a message to #{sendto}")
               # Check - Possible error
-              if algo == "Gossip" do
-                :ok = GenServer.call(sendto, {:rumor})
-              else
-                # send your s and w
-                s = elem(state, 2)
-                w = elem(state, 3)
-                message = {s, w}
-                :ok = GenServer.call(sendto, {:rumor, message})
-              end
+              :ok = GenServer.call(sendto, {:rumor})
 
             init_arg == 0 ->
               IO.puts("Nothing here")
@@ -225,7 +130,7 @@ defmodule Start_Rounds do
         end
       end
 
-      kill_em(algo, percent_nodes)
+      kill_em(percent_nodes)
       # start_rounds(children)
     end
   end
@@ -237,41 +142,26 @@ defmodule Start_Rounds do
 
     IO.puts("Remove me #{sender} from your list")
     Enum.each(nl, fn x -> GenServer.call(x, {:RemoveMe, sender}) end)
-    # Send a normal exit command
+    # Send a normal exit command 
   end
 
-  def kill_em(algo, percent_nodes) do
+  def kill_em(percent_nodes) do
     children = DynamicSupervisor.which_children(DySupervisor)
 
     for x <- children do
       {_, pidx, _, _} = x
-      state = :sys.get_state(pidx)
-      init_arg = elem(state, 0)
-      nl = elem(state, 1)
+      {init_arg, nl} = :sys.get_state(pidx)
 
       if init_arg > 3 do
-        if(algo == "Gossip") do
-          IO.puts("Here i die ")
-          IO.inspect(pidx)
-          current = self()
-          IO.puts("Its me cleaning up ")
-          IO.inspect(current)
-          # Check - Possible error
-          # Dig in - Control not going ba
-          :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
-          IO.puts("Its me cleaning up ")
-        else
-          newRatio = elem(state, 4)
-          oldRatio = elem(state, 5)
-
-          difference = Float.round(newRatio - oldRatio, 11)
-
-          if(abs(difference) < :math.pow(10, -10)) do
-            :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
-            IO.puts("Its me cleaning up ")
-          else
-          end
-        end
+        IO.puts("Here i die ")
+        IO.inspect(pidx)
+        current = self()
+        IO.puts("Its me cleaning up ")
+        IO.inspect(current)
+        # Check - Possible error 
+        # Dig in - Control not going ba
+        :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
+        IO.puts("Its me cleaning up ")
       end
     end
 
@@ -284,14 +174,14 @@ defmodule Start_Rounds do
       IO.puts("Stopping the Supervisor cause most are dead")
       :ok = DynamicSupervisor.stop(DySupervisor)
     else
-      start_rounds(children, algo, percent_nodes)
+      start_rounds(children, percent_nodes)
     end
   end
 end
 
 defmodule Full_topology do
   def full_topology(node_num, rng) do
-    # Produce a list of neighbors for the given specific node
+    # Produce a list of neighbors for the given specific node 
     main_node = node_num
     nebhrs = Enum.filter(rng, fn x -> x != main_node end)
     nl = Enum.map(nebhrs, fn x -> :"#{x}" end)
@@ -307,7 +197,7 @@ defmodule Honeycomb do
         node_num <= 6 ->
           poc =
             cond do
-              # First node
+              # First node 
               poc == {} ->
                 IO.puts("Here")
                 poc = Tuple.append(poc, node_name)
@@ -324,7 +214,7 @@ defmodule Honeycomb do
                 :ok = GenServer.call(nl2, {:update_nl, node_name})
                 poc = Tuple.append(poc, node_name)
 
-              # Every other node
+              # Every other node 
               true ->
                 nebhr = node_num - 1
                 nl = :"#{nebhr}"
@@ -340,7 +230,7 @@ defmodule Honeycomb do
           IO.inspect(values)
 
         node_num > 6 ->
-          # Main players
+          # Main players 
           values =
             cond do
               mode == 0 ->
@@ -349,19 +239,8 @@ defmodule Honeycomb do
                 attach_node = elem(poc, 0)
                 # IO.inspect(attach_node)
                 # IO.puts("HONEY")
-                # {init_arg, attach_node_nl} = :sys.get_state(attach_node)
-                state = :sys.get_state(attach_node)
-                IO.inspect(state)
-                init_arg = elem(state, 0)
-                attach_node_nl = elem(state, 1)
-                IO.inspect(state, label: "Attach node nl")
-                # s = elem(state, 2)
-                # w = elem(state, 3)
-                # newRatio = elem(state, 4)
-                # oldRatio = elem(state, 5)
-
+                {init_arg, attach_node_nl} = :sys.get_state(attach_node)
                 IO.puts("UHOH")
-                IO.inspect(attach_node_nl, label: "Attach node nl")
                 nn1 = String.to_integer(Atom.to_string(Enum.at(attach_node_nl, 0)))
                 nn2 = String.to_integer(Atom.to_string(Enum.at(attach_node_nl, 1)))
                 IO.puts("HI")
@@ -399,17 +278,13 @@ defmodule Honeycomb do
                 # IO.puts("My second call")
                 :ok = GenServer.call(attach_node, {:update_nl, node_name})
                 IO.puts("Done")
-                # {init_arg, attach_node_nl} = :sys.get_state(attach_node)
-                state = :sys.get_state(attach_node)
-                IO.inspect(state, label: "new state")
-                init_arg = elem(state, 0)
-                attach_node_nl = elem(state, 1)
-                g = length(attach_node_nl)
-                IO.inspect(g, label: "LENGTH")
+                {init_arg, attach_node_nl} = :sys.get_state(attach_node)
+                # g = length(attach_node_nl)
+                # IO.inspect(g)
 
                 poc =
                   if length(attach_node_nl) >= 3 do
-                    # check if it needs to be stored
+                    # check if it needs to be stored 
                     poc = Tuple.delete_at(poc, 0)
                   else
                     poc = poc
@@ -418,25 +293,18 @@ defmodule Honeycomb do
                 poc = Tuple.append(poc, node_name)
                 values = {poc = poc, mode = mode}
 
-              # LOOP OVER
+              # LOOP OVER 
               mode == 1 ->
                 mode = 0
                 attach_node_1 = elem(poc, 0)
-                # Get the last element
+                # Get the last element 
                 attach_node_2 = elem(poc, tuple_size(poc) - 1)
-                # {_, attach_node_nl} = :sys.get_state(attach_node_1)
-                state = :sys.get_state(attach_node_1)
-                init_arg = elem(state, 0)
-                attach_node_nl = elem(state, 1)
-
+                {_, attach_node_nl} = :sys.get_state(attach_node_1)
                 :ok = GenServer.call(node_name, {:update_nl, attach_node_1})
                 :ok = GenServer.call(attach_node_1, {:update_nl, node_name})
                 :ok = GenServer.call(node_name, {:update_nl, attach_node_2})
                 :ok = GenServer.call(attach_node_2, {:update_nl, node_name})
-                # {init_arg, attach_node_nl} = :sys.get_state(attach_node_1)
-                state = :sys.get_state(attach_node_1)
-                init_arg = elem(state, 0)
-                attach_node_nl = elem(state, 1)
+                {init_arg, attach_node_nl} = :sys.get_state(attach_node_1)
 
                 poc =
                   if length(attach_node_nl) >= 3 do
@@ -482,7 +350,7 @@ defmodule Honeycomb do
     new_x = x + 1
     nl = []
     # IO.inspect(poc)
-    # start the child with empty nl
+    # start the child with empty nl 
     DySupervisor.start_child(nl, algo, x)
     IO.puts("Child started #{x}")
     IO.inspect(poc)
@@ -494,3 +362,48 @@ defmodule Honeycomb do
     get_nl(rng, poc, mode, new_x, last, algo)
   end
 end
+
+# Main Application  
+num = 1200
+percent_nodes = num - round(0.90 * num)
+rng = Range.new(1, num)
+# the topology of the network 
+topology = "Honeycomb"
+# Algorithm 
+algo = "Gossip"
+
+# Starting the dynamic Server
+{:ok, pid} = DySupervisor.start_link(1)
+IO.puts("Supervisor started")
+
+# Calling each child with its state variables
+if topology == "Full" do
+  for x <- rng do
+    nl = []
+    # first..last = rng
+    # Use String.to_atom to store neighbors
+    nl = Full_topology.full_topology(x, rng)
+    IO.puts("Got nl")
+    DySupervisor.start_child(nl, algo, x)
+    IO.puts("Child started #{x}")
+  end
+end
+
+if topology == "Honeycomb" do
+  poc = {}
+  mode = 0
+  first..last = rng
+  new_x = 0
+  Honeycomb.get_nl(rng, poc, mode, new_x, last, algo)
+end
+
+children = DynamicSupervisor.which_children(DySupervisor)
+IO.inspect(children)
+# Enum.each(children,fn x-> GenServer.cast(x,{:get_neig,})
+
+# Start the first message 
+# A check if names have been assigned correctly 
+:ok = GenServer.call(:"1", {:rumor})
+
+# Start the Rounds 
+Start_Rounds.start_rounds(children, percent_nodes)

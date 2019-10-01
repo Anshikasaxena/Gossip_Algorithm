@@ -1,5 +1,5 @@
 defmodule Start_Rounds do
-  def start_rounds(children, algo) do
+  def start_rounds(children, algo, percent_nodes) do
     if children == [] do
       # terminate
       # Check - might give error for few arguments
@@ -70,7 +70,7 @@ defmodule Start_Rounds do
         end
       end
 
-      kill_em(algo)
+      kill_em(algo, percent_nodes)
       # start_rounds(children)
     end
   end
@@ -85,31 +85,52 @@ defmodule Start_Rounds do
     # Send a normal exit command
   end
 
-  def kill_em(algo) do
+  def kill_em(algo, percent_nodes) do
     children = DynamicSupervisor.which_children(DySupervisor)
 
     for x <- children do
       {_, pidx, _, _} = x
-      # {init_arg, nl} = :sys.get_state(pidx)
       state = :sys.get_state(pidx)
       init_arg = elem(state, 0)
       nl = elem(state, 1)
+      s = elem(state, 2)
+      w = elem(state, 3)
+      newRatio = elem(state, 4)
+      oldRatio = elem(state, 5)
 
       if init_arg > 3 do
-        IO.puts("Here i die ")
-        IO.inspect(pidx)
-        current = self()
-        IO.puts("Its me cleaning up ")
-        IO.inspect(current)
-        # Check - Possible error
-        # Dig in - Control not going ba
-        :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
-        IO.puts("Its me cleaning up ")
+        if(algo == "Gossip") do
+          IO.puts("Here i die ")
+          IO.inspect(pidx)
+          current = self()
+          IO.puts("Its me cleaning up ")
+          IO.inspect(current)
+          # Check - Possible error
+          # Dig in - Control not going ba
+          :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
+          IO.puts("Its me cleaning up ")
+        else
+          difference = Float.round(newRatio - oldRatio, 11)
+
+          if(abs(difference) < :math.pow(10, -10)) do
+            :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
+            IO.puts("Its me cleaning up ")
+          else
+          end
+        end
       end
     end
 
+    # Another terminating condition
     children = DynamicSupervisor.which_children(DySupervisor)
     IO.inspect(children)
-    start_rounds(children, algo)
+    children_alive = length(children)
+
+    if children_alive <= percent_nodes do
+      IO.puts("Stopping the Supervisor cause most are dead")
+      :ok = DynamicSupervisor.stop(DySupervisor)
+    else
+      start_rounds(children, algo, percent_nodes)
+    end
   end
 end
