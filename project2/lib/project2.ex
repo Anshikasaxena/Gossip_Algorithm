@@ -18,6 +18,7 @@ defmodule Project2 do
 
     # Starting the dynamic Server
     {:ok, pid} = DySupervisor.start_link(1)
+
     IO.puts("Supervisor started")
 
     # Calling each child with its state variables
@@ -109,6 +110,8 @@ defmodule Project2 do
     # Start the first message
     # A check if names have been assigned correctly
     # Start the first message
+    startTime = System.monotonic_time()
+
     if algo == "Gossip" do
       :ok = GenServer.call(:"1", {:rumor})
     else
@@ -117,7 +120,10 @@ defmodule Project2 do
     end
 
     # Start the Rounds
-    Start_Rounds.start_rounds(children, algo, percent_nodes)
+    endTime = Start_Rounds.start_rounds(children, algo, percent_nodes)
+    diffTime = endTime - startTime
+    totalTime = System.convert_time_unit(diffTime, :native, :millisecond)
+    IO.puts("The time to converge is #{totalTime}ms")
   end
 end
 
@@ -200,6 +206,7 @@ defmodule Start_Rounds do
       IO.puts("Stopping the Supervisor")
       :ok = DynamicSupervisor.stop(DySupervisor)
       IO.puts("Uh oh ")
+      endTime = System.monotonic_time()
     else
       for x <- children do
         {_, pidx, _, _} = x
@@ -263,7 +270,7 @@ defmodule Start_Rounds do
         end
       end
 
-      kill_em(algo, percent_nodes)
+      endTime = kill_em(algo, percent_nodes)
       # start_rounds(children)
     end
   end
@@ -307,6 +314,7 @@ defmodule Start_Rounds do
           if(abs(difference) < :math.pow(10, -10)) do
             :ok = DynamicSupervisor.terminate_child(DySupervisor, pidx)
             IO.puts("Its me cleaning up ")
+            endTime = System.monotonic_time()
           else
           end
         end
@@ -320,7 +328,9 @@ defmodule Start_Rounds do
 
     if children_alive <= percent_nodes do
       IO.puts("Stopping the Supervisor cause most are dead")
+
       :ok = DynamicSupervisor.stop(DySupervisor)
+      endTime = System.monotonic_time()
     else
       start_rounds(children, algo, percent_nodes)
     end
