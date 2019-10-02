@@ -1,3 +1,4 @@
+
 defmodule Project2 do
   def main(argv) do
     # Main Application
@@ -113,10 +114,10 @@ defmodule Project2 do
     startTime = System.monotonic_time()
 
     if algo == "Gossip" do
-      :ok = GenServer.call(:"1", {:rumor})
+      :ok = GenServer.call(:"1", {:rumor}, :infinity)
     else
       message = {1, 1}
-      :ok = GenServer.call(:"1", {:rumor, message})
+      :ok = GenServer.call(:"1", {:rumor, message}, :infinity)
     end
 
     # Start the Rounds
@@ -253,13 +254,13 @@ defmodule Start_Rounds do
               IO.puts("I #{sender} am sending a message to #{sendto}")
               # Check - Possible error
               if algo == "Gossip" do
-                :ok = GenServer.call(sendto, {:rumor})
+                :ok = GenServer.call(sendto, {:rumor}, :infinity)
               else
                 # send your s and w
                 s = elem(state, 2)
                 w = elem(state, 3)
                 message = {s, w}
-                :ok = GenServer.call(sendto, {:rumor, message})
+                :ok = GenServer.call(sendto, {:rumor, message}, :infinity)
               end
 
             init_arg == 0 ->
@@ -281,7 +282,7 @@ defmodule Start_Rounds do
     sender = elem(name, 1)
 
     IO.puts("Remove me #{sender} from your list")
-    Enum.each(nl, fn x -> GenServer.call(x, {:RemoveMe, sender}) end)
+    Enum.each(nl, fn x -> GenServer.call(x, {:RemoveMe, sender}, :infinity) end)
     # Send a normal exit command
   end
 
@@ -364,12 +365,12 @@ defmodule Honeycomb do
                 nl1 = elem(poc, 0)
                 nl2 = elem(poc, 4)
                 IO.puts("Me #{node_name}")
-                :ok = GenServer.call(node_name, {:update_nl, nl1})
-                :ok = GenServer.call(node_name, {:update_nl, nl2})
+                :ok = GenServer.call(node_name, {:update_nl, nl1}, :infinity)
+                :ok = GenServer.call(node_name, {:update_nl, nl2}, :infinity)
                 IO.puts("Me #{nl1}")
-                :ok = GenServer.call(nl1, {:update_nl, node_name})
+                :ok = GenServer.call(nl1, {:update_nl, node_name}, :infinity)
                 IO.puts("Me #{nl2}")
-                :ok = GenServer.call(nl2, {:update_nl, node_name})
+                :ok = GenServer.call(nl2, {:update_nl, node_name}, :infinity)
                 poc = Tuple.append(poc, node_name)
 
               # Every other node
@@ -377,9 +378,9 @@ defmodule Honeycomb do
                 nebhr = node_num - 1
                 nl = :"#{nebhr}"
                 IO.puts("Me #{node_name}")
-                :ok = GenServer.call(node_name, {:update_nl, nl})
+                :ok = GenServer.call(node_name, {:update_nl, nl}, :infinity)
                 IO.puts("Me #{nl}")
-                :ok = GenServer.call(nl, {:update_nl, node_name})
+                :ok = GenServer.call(nl, {:update_nl, node_name}, :infinity)
                 poc = Tuple.append(poc, node_name)
             end
 
@@ -443,9 +444,9 @@ defmodule Honeycomb do
                   end
 
                 # IO.puts("My first call")
-                :ok = GenServer.call(node_name, {:update_nl, attach_node})
+                :ok = GenServer.call(node_name, {:update_nl, attach_node}, :infinity)
                 # IO.puts("My second call")
-                :ok = GenServer.call(attach_node, {:update_nl, node_name})
+                :ok = GenServer.call(attach_node, {:update_nl, node_name}, :infinity)
                 IO.puts("Done")
                 # {init_arg, attach_node_nl} = :sys.get_state(attach_node)
                 state = :sys.get_state(attach_node)
@@ -477,10 +478,10 @@ defmodule Honeycomb do
                 init_arg = elem(state, 0)
                 attach_node_nl = elem(state, 1)
 
-                :ok = GenServer.call(node_name, {:update_nl, attach_node_1})
-                :ok = GenServer.call(attach_node_1, {:update_nl, node_name})
-                :ok = GenServer.call(node_name, {:update_nl, attach_node_2})
-                :ok = GenServer.call(attach_node_2, {:update_nl, node_name})
+                :ok = GenServer.call(node_name, {:update_nl, attach_node_1}, :infinity)
+                :ok = GenServer.call(attach_node_1, {:update_nl, node_name}, :infinity)
+                :ok = GenServer.call(node_name, {:update_nl, attach_node_2}, :infinity)
+                :ok = GenServer.call(attach_node_2, {:update_nl, node_name}, :infinity)
                 # {init_arg, attach_node_nl} = :sys.get_state(attach_node_1)
                 state = :sys.get_state(attach_node_1)
                 init_arg = elem(state, 0)
@@ -498,8 +499,8 @@ defmodule Honeycomb do
               true ->
                 mode = mode - 1
                 attach_node = elem(poc, tuple_size(poc) - 1)
-                :ok = GenServer.call(node_name, {:update_nl, attach_node})
-                :ok = GenServer.call(attach_node, {:update_nl, node_name})
+                :ok = GenServer.call(node_name, {:update_nl, attach_node}, :infinity)
+                :ok = GenServer.call(attach_node, {:update_nl, node_name}, :infinity)
                 poc = Tuple.append(poc, node_name)
                 values = {poc = poc, mode = mode}
             end
@@ -549,8 +550,8 @@ defmodule Honeycomb_rand do
     x = last
     x_name = :"#{x}"
     rand_nehbr = pick_rand(nebhrs_lst, x)
-    :ok = GenServer.call(x_name, {:update_nl, :"#{rand_nehbr}"})
-    :ok = GenServer.call(:"#{rand_nehbr}", {:update_nl, x_name})
+    :ok = GenServer.call(x_name, {:update_nl, :"#{rand_nehbr}"}, :infinity)
+    :ok = GenServer.call(:"#{rand_nehbr}", {:update_nl, x_name}, :infinity)
   end
 
   def add_neighbor(first, last, nebhrs_lst) do
@@ -560,8 +561,8 @@ defmodule Honeycomb_rand do
     rand_nehbr = pick_rand(nebhrs_lst, x)
 
     # Updating both lists of nodes
-    :ok = GenServer.call(x_name, {:update_nl, :"#{rand_nehbr}"})
-    :ok = GenServer.call(:"#{rand_nehbr}", {:update_nl, x_name})
+    :ok = GenServer.call(x_name, {:update_nl, :"#{rand_nehbr}"}, :infinity)
+    :ok = GenServer.call(:"#{rand_nehbr}", {:update_nl, x_name}, :infinity)
 
     nebhrs_lst = List.delete(nebhrs_lst, rand_nehbr)
 
