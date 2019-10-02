@@ -1,0 +1,11 @@
+{application,project2,
+             [{applications,[kernel,stdlib,elixir,logger]},
+              {description,"project2"},
+              {modules,['Elixir.DySupervisor','Elixir.Full_topology',
+                        'Elixir.Gossip','Elixir.Honeycomb',
+                        'Elixir.Honeycomb_rand','Elixir.Line_topology',
+                        'Elixir.Project2','Elixir.PushSum',
+                        'Elixir.Start_Rounds','Elixir.ThreeD',
+                        'Elixir.TwoDGridTopology']},
+              {registered,[]},
+              {vsn,"0.1.0"}]}.

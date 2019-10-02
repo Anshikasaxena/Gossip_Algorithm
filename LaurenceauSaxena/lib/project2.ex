@@ -180,14 +180,14 @@ defmodule Gossip do
   def handle_call({:RemoveMe, sender}, _from, {init_arg, nl}) do
     new_nl = List.delete(nl, sender)
     # IO.puts("See i removed ya ")
-    IO.inspect(new_nl)
+    # IO.inspect(new_nl)
     {:reply, :ok, {init_arg, new_nl}}
   end
 
   def handle_call({:update_nl, x}, _from, {init_arg, nl}) do
     new_nl = nl ++ [x]
     # IO.puts("updating ..")
-    IO.inspect(new_nl)
+    # IO.inspect(new_nl)
     {:reply, :ok, {init_arg, new_nl}}
   end
 

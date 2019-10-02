@@ -48,7 +48,7 @@ defmodule PushSum do
         {:reply, :ok, {new_state, new_nl, news, neww, newRatio, oldRatio}}
       else
         new_state = 1
-        IO.inspect(self(), label: "I'm resetting state because my difference was #{difference}")
+        # IO.inspect(self(), label: "I'm resetting state because my difference was #{difference}")
         {:reply, :ok, {new_state, new_nl, news, neww, newRatio, oldRatio}}
       end
     else
